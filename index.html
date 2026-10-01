@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#321914">
+<meta name="description" content="Descubre el mensaje del universo en Morenas Ritual.">
+<title>Tu carta del universo · Morenas Ritual</title>
+<style>
+:root{--wine:#351914;--gold:#d9b66d;--cream:#f4dfb5;--ink:#351e19}
+*{box-sizing:border-box} body{margin:0;min-height:100svh;color:var(--cream);font-family:Georgia,'Times New Roman',serif;background:radial-gradient(ellipse at 50% 20%,#74402b 0,#351914 52%,#1d100e 100%);display:flex;justify-content:center;align-items:center;padding:22px;overflow-x:hidden}
+main{width:min(100%,460px);text-align:center}.brand{font-size:clamp(28px,8vw,42px);letter-spacing:.16em;color:var(--gold);margin:0;text-shadow:0 2px 15px #160b09}.sub{font-style:italic;color:#e6c98e;margin:4px 0 22px;font-size:17px}.intro{font-size:16px;line-height:1.5;color:#f0dfc3;margin:0 auto 18px;max-width:340px}
+.stage{perspective:1100px;display:flex;justify-content:center;min-height: min(65vh,570px);align-items:center}.card{width:min(78vw,330px);aspect-ratio:3/4.15;position:relative;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.2,.7,.2,1);filter:drop-shadow(0 18px 22px #100807a8)}.card.reveal{transform:rotateY(180deg)}.face{position:absolute;inset:0;backface-visibility:hidden;border:2px solid var(--gold);border-radius:9px;overflow:hidden;background:#4b251c}.back{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#6d3527,#2a1512 75%);border:5px double var(--gold);box-shadow:inset 0 0 0 8px #4c271d,inset 0 0 0 10px #c59b55}.back:before{content:"✦";font-size:112px;color:var(--gold);text-shadow:0 0 25px #e4bd69;animation:glow 2.5s ease-in-out infinite}.back:after{content:"MORENAS";position:absolute;bottom:22px;color:var(--gold);letter-spacing:.22em;font-size:18px}.front{transform:rotateY(180deg);background:#d4a76a}.front img{width:100%;height:100%;object-fit:cover;display:block}.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0}.button{border:1px solid var(--gold);background:var(--gold);color:#2c1511;border-radius:30px;padding:13px 22px;font:600 15px Georgia,serif;cursor:pointer;transition:transform .2s,background .2s}.button.secondary{background:transparent;color:var(--cream)}.button:active{transform:scale(.97)}.hint{color:#d9bd8b;font-size:13px;margin:12px 0}.foot{font-size:12px;color:#c3a87d;margin-top:16px;letter-spacing:.06em}@keyframes glow{50%{opacity:.65;transform:scale(1.06)}}@media(prefers-reduced-motion:reduce){.card{transition:none}.back:before{animation:none}}
+</style>
+</head>
+<body><main>
+<h1 class="brand">MORENAS</h1><div class="sub">Ritual · Tu mensaje del universo</div>
+<p class="intro" id="intro">Respira, piensa en un deseo y descubre qué tiene el universo para ti.</p>
+<div class="stage"><div class="card" id="card" aria-label="Carta del universo"><div class="face back"></div><div class="face front"><img id="art" alt="Carta de tarot de Morenas"></div></div></div>
+<div class="actions"><button class="button" id="draw">Descubrir mi carta</button><button class="button secondary" id="again" hidden>Otra carta</button></div>
+<p class="hint" id="hint">Tu carta te espera…</p><div class="foot">MORЕNAS RITUAL · DEJA QUE EL UNIVERSO ELIJA</div>
+</main>
+<script>
+const total = 20;
+let last = -1;
+let busy = false;
+const card = document.getElementById('card');
+const art = document.getElementById('art');
+const draw = document.getElementById('draw');
+const again = document.getElementById('again');
+const hint = document.getElementById('hint');
+const intro = document.getElementById('intro');
+
+function pickCard() {
+  let n;
+  do { n = Math.floor(Math.random() * total); } while (n === last);
+  last = n;
+  return n + 1;
+}
+
+function revealCard() {
+  if (busy) return;
+  busy = true;
+  draw.disabled = true;
+  again.disabled = true;
+  card.classList.remove('reveal');
+  hint.textContent = 'El universo está eligiendo…';
+
+  const number = pickCard();
+  const imagePath = `cartas/carta-${String(number).padStart(2, '0')}.jpg`;
+
+  // Wait until the card has loaded before flipping it, avoiding a race
+  // where a fast/cached image could finish before onload is attached.
+  const preload = new Image();
+  preload.onload = () => {
+    art.src = imagePath;
+    requestAnimationFrame(() => {
+      card.classList.add('reveal');
+      hint.textContent = 'Esta es tu carta. ¿Te dejas guiar?';
+      draw.hidden = true;
+      again.hidden = false;
+      again.disabled = false;
+      busy = false;
+    });
+  };
+  preload.onerror = () => {
+    hint.textContent = 'No se pudo cargar la carta. Comprueba que subiste también la carpeta “cartas”.';
+    draw.disabled = false;
+    again.disabled = false;
+    busy = false;
+  };
+  preload.src = imagePath;
+}
+
+draw.addEventListener('click', revealCard);
+again.addEventListener('click', () => {
+  draw.hidden = false;
+  draw.disabled = false;
+  again.hidden = true;
+  intro.textContent = 'El azar tiene otro mensaje para ti. ¿Qué te recomienda ahora el universo?';
+  revealCard();
+});
+</script></body></html>
